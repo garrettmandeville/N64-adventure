@@ -1,0 +1,5 @@
+{
+  "imageName": "localhost:5000/libdragon-toolchain:preview",
+  "vendorDirectory": "libdragon",
+  "vendorStrategy": "submodule"
+}

@@ -1,0 +1,5 @@
+build/
+filesystem/
+*.z64
+.t3d-build.log
+.claude/settings.local.json
