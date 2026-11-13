@@ -5,3 +5,4 @@ filesystem/
 .claude/settings.local.json
 .libdragon-build.log
 .game-build.log
+*.blend1

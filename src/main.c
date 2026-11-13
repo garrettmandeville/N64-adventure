@@ -63,10 +63,23 @@ int main(void)
     rdpq_init();                    // Start the RDP command queue (pixel drawing).
     t3d_init((T3DInitParams){});    // Start tiny3d with default settings.
 
-    // --- Per-frame transform buffers ------------------------------------
-    // One model matrix per framebuffer, so the CPU never overwrites a matrix
-    // the RSP is still reading. Uncached because the RSP reads it via DMA.
+    // --- Model transforms -----------------------------------------------
+    // Every matrix the RSP reads is allocated uncached: the RSP fetches it
+    // from RAM via DMA, so CPU writes must not linger in the CPU cache.
+
+    // Dynamic object: one matrix per framebuffer. The model moves every
+    // frame, so the CPU writes a fresh slot each frame and never overwrites
+    // a matrix the RSP may still be reading for an earlier frame.
     T3DMat4FP* modelMatFP = malloc_uncached(sizeof(T3DMat4FP) * FB_COUNT);
+
+    // Static object: a single matrix, written once here during setup.
+    // It never changes afterwards, so the RSP can never read it mid-update.
+    T3DMat4FP* roomMatFP = malloc_uncached(sizeof(T3DMat4FP));
+    t3d_mat4fp_from_srt_euler(roomMatFP,
+            (float[3]){0.1f, 0.1f, 0.1f},   // Scale (matches the model's 10%)
+            (float[3]){0.0f, 0.0f, 0.0f},   // Rotation (radians, X/Y/Z)
+            (float[3]){0.0f, 0.0f, 0.0f}    // Translation (world origin)
+        );
 
     // The camera's view of the world, also buffered once per framebuffer.
     T3DViewport viewport = t3d_viewport_create_buffered(FB_COUNT);
@@ -90,6 +103,7 @@ int main(void)
     // Load model geometry and materials from the ROM filesystem.
     // Pipeline: Blender -> .glb -> (gltf_to_t3d) -> .t3dm -> packed into ROM.
     T3DModel *model = t3d_model_load("rom:/model.t3dm");
+    T3DModel *room = t3d_model_load("rom:/room.t3dm");
 
     // --- Loop state -----------------------------------------------------
     float rotAngle = 0.0f;          // Model's current rotation, in radians.
