@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "N64 (libdragon)",
+            "compilerPath": "${env:N64_INST}/bin/mips64-elf-gcc",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/tiny3d/src",
+                "${env:N64_INST}/mips64-elf/include/newlib_overrides",
+                "${env:N64_INST}/mips64-elf/include"
+            ],
+            "defines": [
+                "N64",
+                "LIBDRAGON_PREVIEW=2"
+            ],
+            "forcedInclude": [
+                "${env:N64_INST}/mips64-elf/include/ktls.h"
+            ],
+            "cStandard": "gnu23",
+            "intelliSenseMode": "gcc-x86"
+        }
+    ],
+    "version": 4
+}
