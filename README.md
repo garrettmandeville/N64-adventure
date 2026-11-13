@@ -29,6 +29,16 @@ I'm building this project to learn C and low-level programming on real, constrai
 - **Command queues and recorded display lists:** draw calls queue commands for the RSP rather than drawing immediately, and unchanging command sequences are recorded once and replayed each frame.
 - **Working within hardware limits:** 4 KB of texture memory, power-of-two texture wrapping, `float` over `double`, and a 16-bit depth buffer.
 
+## How I'm building this
+
+I write all of the game's code myself. I use Claude (Anthropic's AI assistant) as a **mentor**, not a code generator:
+
+- It **explains** hardware and C concepts with small examples that aren't my exact solution, and then I write the code.
+- When I'm debugging, it **asks guiding questions** first, so I learn to read compiler errors and headers myself.
+- When I finish a step, it **reviews** my code honestly: what works, what to fix, and what to learn next.
+
+It has also handled tooling and support work: setting up the toolchain and build configuration, generating the placeholder room model, and drafting documentation. Commits where Claude made changes are marked with a `Co-Authored-By` line. These rules live in [CLAUDE.md](CLAUDE.md), so the same approach applies on every machine I work from.
+
 ## Building
 
 ### Requirements
