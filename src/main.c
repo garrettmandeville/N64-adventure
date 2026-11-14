@@ -86,8 +86,11 @@ int main(void)
 
     // --- Camera ---------------------------------------------------------
     // Positions are in world units: X = right, Y = up, Z = toward the viewer.
-    const fm_vec3_t camPos = {{0,10.0f,40.0f}};     // Camera location.
-    const fm_vec3_t camTarget = {{0,0,0}};          // Point the camera looks at (world origin).
+    // The room spans X/Z -51.2..51.2 and Y 0..64 (floor at Y 0).
+    // Camera sits near the front wall, about 5.5 m up, looking slightly down
+    // at the gear's center so it is framed in the middle of the screen.
+    const fm_vec3_t camPos    = {{0.0f, 35.0f, 40.0f}};     // Camera location.
+    const fm_vec3_t camTarget = {{0.0f, 28.0f,  0.0f}};     // Gear center (see Translation below).
 
     // --- Lighting -------------------------------------------------------
     // Colors are RGBA, 0-255 per channel.
@@ -120,9 +123,18 @@ int main(void)
         frameIdx = (frameIdx + 1) % FB_COUNT;   // Cycle 0, 1, 2, 0, 1, 2...
 
         // Set the camera lens: field of view, near plane, far plane (draw distance).
-        t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(85.0f), 10.0f, 150.0f);
+        //   Near 10:  the closest visible geometry is the gear's teeth as they
+        //             turn toward the camera (~13.8 units away), so 10 never
+        //             clips anything.
+        //   Far 120:  the farthest visible corner, (+/-51.2, 0, -51.2), is
+        //             ~110.3 units from the camera; ~10% margin on top.
+        //   A far/near ratio of 12 keeps the 16-bit depth buffer precise.
+        //   TODO: Revisit when the camera moves; the room diagonal (~158.3)
+        //         covers any camera position inside it.
+        t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(85.0f), 10.0f, 120.0f);
         // Aim the camera: from camPos, toward camTarget, with +Y as "up".
-        t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(fm_vec3_t){{0,1,0}});
+        // The up vector is a direction only (its length doesn't matter).
+        t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(fm_vec3_t){{0.0f, 1.0f, 0.0f}});
 
         // Advance rotation by a fixed step per frame.
         // TODO: Scale by delta time so speed is independent of frame rate.
@@ -135,8 +147,12 @@ int main(void)
         t3d_mat4fp_from_srt_euler(&modelMatFP[frameIdx],
             (float[3]){modelScale, modelScale, modelScale},   // Scale
             (float[3]){0.0f, rotAngle * 0.2f, rotAngle},        // Rotation
-            (float[3]){0, 0, 0}                                 // Translation (world origin)
+            (float[3]){0.0f, 28.0f, 0.0f}                     // Translation
         );
+        // Gear height: its farthest vertex is ~26.8 units from its center
+        // (4.19 Blender m x 6.4). It spins on two axes, so any tooth can point
+        // straight down; the center must be at least 26.8 above the floor
+        // (Y 0). 28 leaves a ~1.2-unit gap.
 
         // --- Draw -------------------------------------------------------
         // Everything drawn this frame goes between rdpq_attach() and

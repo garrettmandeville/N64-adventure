@@ -39,7 +39,9 @@ The two machines are set up differently. **Don't change the `Makefile` header co
 - tiny3d's converter **requires Fast64 material data** (`f3d_mat` in glTF material extras). Export with **Include → Custom Properties**. Textures must be loaded from `assets/` so their paths map to `rom:/`.
 - **Blender 5.2 + Fast64 2.6.0:** real F3D materials export all-white vertex colours, and creating one adds a stray `PlaneObject`. `assets/room.blend` therefore uses a plain material with an `f3d_mat` custom property plus a `Col` colour layer. Export vertex colours **by name, `Col`**. Don't convert it to a Fast64 material in 5.2.
 - `stone01.i8.png` is a 96×32 atlas of three 32×32 tiles. It isn't a power of two, so it can't wrap; the room maps each 2×2 quad to the middle tile.
-- Models are authored to be drawn at **scale 0.1** in game.
+- Models are authored to be drawn at **scale 0.1** in game. One Blender metre = 64 × 0.1 = **6.4 game units**. Blender is Z-up; the exporter converts to the game's Y-up.
+- **Origin convention:** levels/rooms have their origin at **floor level, centred** (floor = Y 0). Characters and props: bottom centre (at the feet). Things that rotate: at the pivot. `room.blend` follows this: 16 × 16 × 10 m, floor at 0, ceiling at 10 m, which is X/Z ±51.2 and Y 0–64 in game units.
+- **Re-exporting `room.glb`:** File → Export → glTF 2.0 (`.glb`), with **Include → Custom Properties** on, and **Data → Mesh → Vertex Colors: Use Name `Col`**. Re-exported with Blender 5.3 (macOS), which omits the unused `baseColorFactor`; that's harmless, since tiny3d only reads `f3d_mat`. Blender 5.2 (Linux) may warn when opening a file saved by 5.3, but the plain mesh and material load fine.
 
 ## Code conventions established so far
 
