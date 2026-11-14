@@ -42,7 +42,7 @@ I write all of the game's code myself. I use Claude (Anthropic's AI assistant) a
 - When I'm debugging, it **asks guiding questions** first, so I learn to read compiler errors and headers myself.
 - When I finish a step, it **reviews** my code honestly: what works, what to fix, and what to learn next.
 
-It has also handled tooling and support work: setting up the toolchain and build configuration, generating and re-exporting the placeholder room model, and drafting documentation. On one occasion, at my request, it wrote the camera, depth-plane and model-placement values for the room, with a full explanation of the math behind each number. Commits where Claude made changes are marked with a `Co-Authored-By` line. These rules live in [CLAUDE.md](CLAUDE.md), so the same approach applies on every machine I work from.
+It has also handled tooling and support work: setting up the toolchain and build configuration, generating and re-exporting the placeholder room model, and drafting documentation. On occasion, at my request, Claude completes code with a full explanation of the logic and decisions behind each change. Commits where Claude made changes are marked with a `Co-Authored-By` line. These rules live in [CLAUDE.md](CLAUDE.md), so the same approach applies on every machine I work from.
 
 ## Building
 
