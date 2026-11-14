@@ -15,7 +15,7 @@ I'm a CS student (background in Java and C++) learning C and N64 programming by 
 
 ## Build and run
 
-- Build: `make` (needs `N64_INST` set and `$N64_INST/bin` on `PATH`). Clean: `make clean`. Output: `hello.z64`.
+- Build: `make` (needs `N64_INST` set and `$N64_INST/bin` on `PATH`). Clean: `make clean`. Output: `hello.z64`. On macOS, prefix with `libdragon` (see **Machines**).
 - Run: an emulator with accurate RSP emulation, e.g. ares. Mupen-based emulators often fail with tiny3d's custom microcode.
 - Submodules: `libdragon` (**`preview` branch**, which tiny3d requires) and `tiny3d`. After cloning: `git submodule update --init`.
 - Builds use `-Werror`, but unused-variable warnings are allowed (expected while a step is half done).
@@ -25,7 +25,13 @@ I'm a CS student (background in Java and C++) learning C and N64 programming by 
 The two machines are set up differently. **Don't change the `Makefile` header comment or `.libdragon/config.json` to suit one machine.**
 
 - **Linux (Fedora Atomic):** toolchain is the prebuilt libdragon RPM extracted to `~/.local/opt/libdragon` (`N64_INST`, exported in `~/.bashrc`). Build with plain `make`, not `libdragon make`. Blender and ares are Flatpaks (`flatpak run dev.ares.ares hello.z64`). Fast64 v2.6.0 is installed in Blender 5.2.
-- **macOS:** set up separately; ask before assuming paths or tools.
+- **macOS (Apple Silicon):** the toolchain runs in **Docker** through the [libdragon CLI](https://github.com/anacierdem/libdragon-docker) (`/opt/homebrew/bin/libdragon`). There is no host toolchain, and `N64_INST` is not set on the host.
+  - Build with **`libdragon make`** (clean: `libdragon make clean`), run from the project root. Plain `make` does not work on this machine.
+  - The CLI mounts the project root at `/libdragon` inside the container. The toolchain is at `/n64_toolchain`, and compiler errors show container paths.
+  - Image: `libdragon-toolchain:preview`, built locally and served from a local registry container (`local-registry`, `registry:2` on port 5000) as `localhost:5000/libdragon-toolchain:preview`, which `.libdragon/config.json` references. The CLI reuses its existing container, so the registry only needs to be running to recreate it.
+  - libdragon (`preview`) and tiny3d are built from the submodules and installed into the container's `/n64_toolchain`. After bumping either submodule, rebuild inside the container: `libdragon install` for libdragon, then `libdragon exec bash -c "cd tiny3d && ./build.sh"`.
+  - Run: `open -a ares hello.z64` (ares is installed in `/Applications`).
+  - VS Code IntelliSense: select the **"N64 (macOS, Docker toolchain)"** configuration in `.vscode/c_cpp_properties.json` (status bar → C/C++ configuration). It reads headers from the submodules, since the toolchain is only inside Docker.
 
 ## Asset pipeline
 

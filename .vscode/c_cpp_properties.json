@@ -18,6 +18,24 @@
             ],
             "cStandard": "gnu23",
             "intelliSenseMode": "gcc-x86"
+        },
+        {
+            "name": "N64 (macOS, Docker toolchain)",
+            "compilerPath": "/usr/bin/clang",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/tiny3d/src",
+                "${workspaceFolder}/libdragon/include"
+            ],
+            "defines": [
+                "N64",
+                "LIBDRAGON_PREVIEW=2"
+            ],
+            "forcedInclude": [
+                "${workspaceFolder}/libdragon/include/ktls.h"
+            ],
+            "cStandard": "gnu23",
+            "intelliSenseMode": "macos-clang-arm64"
         }
     ],
     "version": 4
