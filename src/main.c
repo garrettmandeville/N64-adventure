@@ -108,6 +108,7 @@ int main(void)
     // --- Loop state -----------------------------------------------------
     float rotAngle = 0.0f;          // Model's current rotation, in radians.
     rspq_block_t *dplDraw = NULL;   // Recorded draw commands (built on first frame).
+    rspq_block_t *dplRoom = NULL;   // Recorded draw commands for the static room.
     int frameIdx = 0;               // Which per-frame buffer slot is in use (0..FB_COUNT-1).
 
     // =====================================================================
@@ -171,11 +172,28 @@ int main(void)
             dplDraw = rspq_block_end();
         }
 
-        // Apply this frame's model matrix, then replay the recorded draw.
-        // The push stays outside the recording because the matrix changes
-        // every frame; the matching pop is recorded inside the block.
+        // Record the static room's draw commands once, as a self-contained
+        // block. The room's matrix has a fixed address and never changes
+        // after setup, so its push can be recorded inside the block along
+        // with the matching pop.
+        if(!dplRoom) {
+            rspq_block_begin();
+            t3d_matrix_push(roomMatFP);
+            t3d_model_draw(room);
+            t3d_matrix_pop(1);          // Pairs with the recorded push above.
+            dplRoom = rspq_block_end();
+        }
+
+        // Spinning model: apply this frame's matrix, then replay its block.
+        // The push stays outside the recording because the matrix slot
+        // changes every frame; the matching pop is recorded inside the block.
         t3d_matrix_push(&modelMatFP[frameIdx]);
         rspq_block_run(dplDraw);
+
+        // Room: self-contained (push and pop are recorded inside), so it
+        // needs no setup here and could run in either order; the depth
+        // buffer resolves which surfaces are in front.
+        rspq_block_run(dplRoom);
 
         // Finish the frame and queue it for display.
         rdpq_detach_show();
