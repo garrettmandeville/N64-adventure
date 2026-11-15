@@ -2,10 +2,9 @@
  * @file    main.c
  * @brief   Entry point for the N64 dark fantasy action-adventure.
  *
- * Currently a learning scaffold based on tiny3d's "01_model" example:
- * it initializes the N64 hardware and tiny3d, sets up a camera and
- * lighting, loads a 3D model from the ROM filesystem, and draws it
- * spinning each frame.
+ * Currently a learning scaffold that grew out of tiny3d's "01_model"
+ * example: a lit, fogged stone room containing a gear model, which stands
+ * in for the player. The controller's analog stick spins the gear.
  *
  * Program structure (the standard game-loop pattern):
  *   1. Setup  - runs once: hardware, engine, camera, lights, assets.
@@ -62,6 +61,7 @@ int main(void)
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, FB_COUNT, GAMMA_NONE, FILTERS_RESAMPLE_ANTIALIAS);
     rdpq_init();                    // Start the RDP command queue (pixel drawing).
     t3d_init((T3DInitParams){});    // Start tiny3d with default settings.
+    joypad_init();                  // Start the controller input system.
 
     // --- Model transforms -----------------------------------------------
     // Every matrix the RSP reads is allocated uncached: the RSP fetches it
@@ -125,6 +125,27 @@ int main(void)
         // --- Update -----------------------------------------------------
         frameIdx = (frameIdx + 1) % FB_COUNT;   // Cycle 0, 1, 2, 0, 1, 2...
 
+        // --- Input ------------------------------------------------------
+        // Controllers are read in the background during the vertical blank
+        // interrupt; joypad_poll() takes one consistent snapshot for the
+        // whole frame. Poll once, before anything reads input.
+        joypad_poll();
+        joypad_inputs_t inputs = joypad_get_inputs(JOYPAD_PORT_1);
+
+        // Spin control from the stick's X axis:
+        //   dead zone  - ignore |x| <= 10 so stick drift doesn't move the gear
+        //   normalize  - divide as float by the N64 stick's practical max
+        //                (~90, not 127), giving roughly -1.0 .. +1.0
+        float spinInput = 0.0f;
+        if (abs(inputs.stick_x) > 10) {
+            spinInput = (float)inputs.stick_x / JOYPAD_RANGE_N64_STICK_MAX;
+        }
+
+        // Apply: input fraction x max speed (radians per frame).
+        // TODO: Scale by delta time so speed is independent of frame rate.
+        const float SPIN_SPEED = 0.02f;
+        rotAngle += spinInput * SPIN_SPEED;
+
         // Set the camera lens: field of view, near plane, far plane (draw distance).
         //   Near 10:  the closest visible geometry is the gear's teeth as they
         //             turn toward the camera (~13.8 units away), so 10 never
@@ -138,10 +159,6 @@ int main(void)
         // Aim the camera: from camPos, toward camTarget, with +Y as "up".
         // The up vector is a direction only (its length doesn't matter).
         t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(fm_vec3_t){{0.0f, 1.0f, 0.0f}});
-
-        // Advance rotation by a fixed step per frame.
-        // TODO: Scale by delta time so speed is independent of frame rate.
-        rotAngle -= 0.02f;
 
         // Build this frame's model matrix from Scale, Rotation (radians,
         // per axis X/Y/Z), and Translation. Written to this frame's slot so
