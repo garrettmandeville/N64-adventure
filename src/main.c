@@ -96,6 +96,9 @@ int main(void)
     // Colors are RGBA, 0-255 per channel.
     uint8_t colorAmbient[4] = {80, 80, 100, 0xFF};      // Fill light that reaches every surface.
     uint8_t colorDir[4]     = {0xEE, 0xAA, 0xAA, 0xFF}; // Directional ("sun") light color.
+    // Dark violet atmosphere color. Shared by the fog and the screen clear,
+    // so distant geometry fades seamlessly into the background.
+    color_t fogColor = RGBA32(20, 0, 50, 0xFF);
 
     // Direction of the directional light. Normalized to length 1, as
     // lighting math expects a pure direction.
@@ -164,8 +167,24 @@ int main(void)
         t3d_frame_start();
         t3d_viewport_attach(&viewport);
 
-        // Clear the previous frame: background color and depth information.
-        t3d_screen_clear_color(RGBA32(100, 80, 80, 0xFF));
+        // Fog. Must be set after t3d_frame_start(), which disables RDP fog
+        // blending every frame, and before anything is drawn.
+        //   RDP (per pixel):  blend each pixel toward fogColor by the
+        //                     vertex's fog amount (stored in shade alpha).
+        //   RSP (per vertex): linear fog ramp in world units, separate from
+        //                     the camera's near/far planes.
+        rdpq_mode_fog(RDPQ_FOG_STANDARD);
+        rdpq_set_fog_color(fogColor);
+        // Range chosen by eye for atmosphere: the gear's center (~40.6) stays
+        // clear and its far teeth (~67) take on light haze. The back wall's
+        // top edge (~95.7) is fully fogged, so it dissolves into the
+        // background instead of showing a hard edge.
+        t3d_fog_set_range(50.0f, 95.0f);
+        t3d_fog_set_enabled(true);
+
+        // Clear the previous frame: background color (shared with the fog)
+        // and depth information.
+        t3d_screen_clear_color(fogColor);
         t3d_screen_clear_depth();
 
         // Lighting: ambient fill plus one directional light in slot 0.

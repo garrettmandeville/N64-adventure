@@ -60,7 +60,9 @@ Milestone 1, "a model in a room" (see `design/design.md` §13):
 3. ✅ Static room matrix in setup
 4. ✅ Record and draw the room (its own `rspq` block; push/pop balance)
 5. ✅ Fit the camera and far plane to the room (16-bit depth buffer)
-6. ⬜ Fog (see `tiny3d/examples/04_dynamic/main.c`); fog colour matches the clear colour
-7. ⬜ Build and test in ares
+6. ✅ Fog (see `tiny3d/examples/04_dynamic/main.c`); fog colour matches the clear colour
+7. ✅ Build and test in ares
+
+**Milestone 1 complete.** Next is milestone 2, "a moving character" (`design/design.md` §13). Its lesson plan hasn't been written yet.
 
 Update this list as steps are completed.

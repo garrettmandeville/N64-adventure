@@ -4,7 +4,7 @@ A 3D dark-fantasy action-adventure for the **Nintendo 64**, written in C and run
 
 The player is a hero who looks like a villain. They fight with sword and shield, and **every weapon and shield holds its own dark spell**. Those spells are also the tools for exploration and puzzles, so finding new gear is how the world opens up. The full design is in [design/design.md](design/design.md).
 
-> **Status:** early development. A textured, lit model spins inside a stone room, with the camera and depth range fitted to the room. Fog is next. See the [roadmap](#roadmap).
+> **Status:** early development. A textured, lit model spins inside a stone room, with the camera and depth range fitted to the room and dark violet distance fog. Milestone 1 is complete; player movement is next. See the [roadmap](#roadmap).
 
 ---
 
@@ -31,6 +31,8 @@ I'm building this project to learn C and low-level programming on real, constrai
 - **Framebuffers:** double and triple buffering let the CPU, RSP and RDP work on different frames at once without showing a half-drawn image, trading memory (~150 KB per 320×240 buffer) for less waiting.
 - **Depth-buffer precision:** a 16-bit depth buffer spreads 65,536 values between the near and far planes, packed most densely near the camera. Fitting the planes tightly to the scene (a small far/near ratio) prevents z-fighting.
 - **Vector math:** distance as √(dx² + dy² + dz²), direction vs. magnitude, and using it to fit the camera's view range and keep a spinning model clear of the floor.
+- **Fog across two processors:** the RSP computes a fog amount per vertex from its distance and stores it in the vertex's alpha. The RDP's blender then mixes each pixel toward the fog colour by that amount. RDP state is reset each frame, so fog is set after the frame starts. Geometry only dissolves into the background where it's fully fogged.
+- **Back-face culling:** triangles facing away from the camera are discarded before rasterization, which roughly halves the fill work. Every face has to point toward where it's viewed from.
 - **Model origins:** levels have their origin at floor level and props at their base, so positions, rotation and collision start from a clean reference.
 - **Working within hardware limits:** 4 KB of texture memory, power-of-two texture wrapping, `float` over `double`, and a 16-bit depth buffer.
 
@@ -97,7 +99,7 @@ Converted assets (`filesystem/`) and build output (`build/`, `*.z64`) are genera
 
 From the [design document](design/design.md#13-build-milestones):
 
-- [ ] **A model on screen:** tiny3d renders a 3D model in a room *(in progress)*
+- [x] **A model on screen:** tiny3d renders a 3D model in a room
 - [ ] **A moving character:** analog movement, character faces its direction
 - [ ] **Follow camera:** orbiting camera with C-button control
 - [ ] **Collision:** floors and walls
