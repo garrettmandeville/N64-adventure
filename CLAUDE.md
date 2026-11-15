@@ -41,6 +41,7 @@ The two machines are set up differently. **Don't change the `Makefile` header co
 - `stone01.i8.png` is a 96×32 atlas of three 32×32 tiles. It isn't a power of two, so it can't wrap; the room maps each 2×2 quad to the middle tile.
 - Models are authored to be drawn at **scale 0.1** in game. One Blender metre = 64 × 0.1 = **6.4 game units**. Blender is Z-up; the exporter converts to the game's Y-up.
 - **Origin convention:** levels/rooms have their origin at **floor level, centred** (floor = Y 0). Characters and props: bottom centre (at the feet). Things that rotate: at the pivot. `room.blend` follows this: 16 × 16 × 10 m, floor at 0, ceiling at 10 m, which is X/Z ±51.2 and Y 0–64 in game units.
+- **Face orientation:** materials use back-face culling (`g_cull_back`), so every face must point toward where it's viewed from. For rooms, that's **inward**. Check in Blender with Overlays → Face Orientation (blue = front, red = back) and fix with Mesh → Normals → Flip. The room has no ceiling (an open top, viewed from above).
 - **Re-exporting `room.glb`:** File → Export → glTF 2.0 (`.glb`), with **Include → Custom Properties** on, and **Data → Mesh → Vertex Colors: Use Name `Col`**. Re-exported with Blender 5.3 (macOS), which omits the unused `baseColorFactor`; that's harmless, since tiny3d only reads `f3d_mat`. Blender 5.2 (Linux) may warn when opening a file saved by 5.3, but the plain mesh and material load fine.
 
 ## Code conventions established so far
@@ -58,7 +59,7 @@ Milestone 1, "a model in a room" (see `design/design.md` §13):
 2. ✅ Load `rom:/room.t3dm`
 3. ✅ Static room matrix in setup
 4. ✅ Record and draw the room (its own `rspq` block; push/pop balance)
-5. ⬜ Fit the camera and far plane to the room (16-bit depth buffer)
+5. ✅ Fit the camera and far plane to the room (16-bit depth buffer)
 6. ⬜ Fog (see `tiny3d/examples/04_dynamic/main.c`); fog colour matches the clear colour
 7. ⬜ Build and test in ares
 
