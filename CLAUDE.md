@@ -68,7 +68,7 @@ Milestone 1, "a model in a room" (see `design/design.md` §13):
 Milestone 2, "a moving character" (see `design/design.md` §13). The gear stands in for the player until a character model exists:
 
 1. ✅ Read the controller: `joypad_init` / `joypad_poll` / `joypad_get_inputs` (`libdragon/include/joypad.h`); stick range and dead zone
-2. ⬜ Delta time: `display_get_delta_time` (`display.h`); fix the `rotAngle` TODO so speed is frame-rate independent
+2. ✅ Delta time: `display_get_delta_time` (`display.h`); fix the `rotAngle` TODO so speed is frame-rate independent
 3. ⬜ Move in the world: the stick drives a position vector (units per second × delta time); the model's translation follows it
 4. ⬜ Face the movement direction: direction vector → angle with `atan2f`
 5. ⬜ Stay inside the room: clamp position to the walls (X/Z ±51.2, minus the model's radius)

@@ -122,6 +122,14 @@ int main(void)
     // =====================================================================
     for(;;)
     {
+        // --- Timing -----------------------------------------------------
+        // Delta time: seconds the previous frame took (~0.0167 at 60 FPS,
+        // ~0.033 at 30 FPS), measured by libdragon. Multiplying any rate
+        // (units per second) by it gives that frame's change, so motion
+        // runs at the same real-world speed at any frame rate.
+        // Call once per frame only (see display.h); reuse this variable.
+        float deltaTime = display_get_delta_time();
+
         // --- Update -----------------------------------------------------
         frameIdx = (frameIdx + 1) % FB_COUNT;   // Cycle 0, 1, 2, 0, 1, 2...
 
@@ -141,10 +149,12 @@ int main(void)
             spinInput = (float)inputs.stick_x / JOYPAD_RANGE_N64_STICK_MAX;
         }
 
-        // Apply: input fraction x max speed (radians per frame).
-        // TODO: Scale by delta time so speed is independent of frame rate.
-        const float SPIN_SPEED = 0.02f;
-        rotAngle += spinInput * SPIN_SPEED;
+        // Integrate: angle += rate x time, where rate is the stick fraction
+        // times the max spin speed. Units check:
+        //   (unitless) x (rad/s) x (s) = rad of rotation this frame.
+        // At full stick, one turn on the Z axis takes 2π / 1.2 ≈ 5.2 s.
+        const float SPIN_SPEED = 1.2f;  // Max spin speed, radians per second.
+        rotAngle += spinInput * SPIN_SPEED * deltaTime;
 
         // Set the camera lens: field of view, near plane, far plane (draw distance).
         //   Near 10:  the closest visible geometry is the gear's teeth as they
